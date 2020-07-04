@@ -37,4 +37,16 @@ stepFunctions:
               Resource: 
                 Fn::GetAtt: [double,Arn]
               End: true
+              Retry:
+                - ErrorEquals: [NumberTooBig]
+                  MaxAttempts: 0
+                - ErrorEquals: [States.ALL]
+                  MaxAttempts: 3
+              Catch: 
+                - ErrorEquals: [NumberTooBig]
+                  Next: DefaultResponse
+            DefaultResponse:
+              Type: Pass
+              Result: 42
+              End: true
 

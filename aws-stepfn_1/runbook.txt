@@ -1,1 +1,15 @@
-sls invoke stepf --name simple-math --data "{\"x\":10, \"y\": 20}"
+sls invoke stepf --name simple-math --data "{\"x\":40, \"y\": 10}"
+
+
+handler_chaining.js - how to make multiple task by chaining then in a state machine
+
+handler_retry.js - handeling retries in case of any error/execption
+
+handler_catch.js - catching for graceful message and limit retry and avoid retry
+
+handler_catch_issue_4.js - issue with just catching, need of brach
+
+handler_branching.js - braching to handle the double for small and big number based on the choice state implementation
+
+
+https://github.com/theburningmonk/complete-guide-to-step-functions-examples/tree/master/Other%20services

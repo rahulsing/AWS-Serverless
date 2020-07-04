@@ -1,0 +1,62 @@
+
+
+org: errahul289
+app: myapp-step-function
+service: aws-stepfn-1
+
+plugins:
+  - serverless-step-functions
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+
+functions:
+  add:
+    handler: handler.add
+  double:
+    handler: handler.double
+  sample:
+    handler: handler.sample
+  doubleBigNumber:
+    handler: handler.doubleBigNumber
+
+stepFunctions:
+    stateMachines:
+      simple-math:
+        definition: 
+          Comment: math  example
+          StartAt: Add
+          States:
+            Add: 
+              Type: Task
+              Resource:
+                Fn::GetAtt: [add,Arn]
+              Next: IsBigNumber
+            IsBigNumber:
+              Type: Choice
+              Choices: 
+                - Variable: $
+                  NumericGreaterThan: 50
+                  Next: DoubleBigNumber
+              Default: Double
+            Double:
+              Type: Task
+              Resource: 
+                Fn::GetAtt: [double,Arn]
+              End: true
+              Retry:
+                - ErrorEquals: [NumberTooBig]
+                  MaxAttempts: 0
+                - ErrorEquals: [States.ALL]
+                  MaxAttempts: 3
+              Catch: 
+                - ErrorEquals: [NumberTooBig]
+                  Next: DoubleBigNumber
+            DoubleBigNumber:
+              Type: Task
+              Resource: 
+                Fn::GetAtt: [doubleBigNumber,Arn]
+              End: true
+
