@@ -52,8 +52,8 @@ Content-Disposition: attachment; filename="userdata.txt"
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 cd /home/ec2-user/
 
-rm ~file~.csv
-rm ~file~.zip
+rm -f ~file~.csv
+rm -f ~file~.zip
 aws s3 cp ~src_path~~file~.zip ~file~.zip 
 unzip -o -q ~file~.zip 
 aws s3 cp ~file~.csv ~tgt_root_path~~file~ 
