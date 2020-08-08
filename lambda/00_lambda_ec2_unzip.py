@@ -13,6 +13,17 @@ import base64
 
 ### Addition steps are added to run the scrip on stop and start
 
+def stop_ecc2(client,my_instance):
+    client.stop_instances(InstanceIds=[my_instance])
+    waiter=client.get_waiter('instance_stopped')
+    waiter.wait(InstanceIds=[my_instance])
+ 
+def start_ecc2(res,my_instance):
+    #Start Instance here
+    ob_my_instance = res.Instance(my_instance)
+    ob_my_instance.start()
+    ob_my_instance.wait_until_running()
+
 try:
     S3_SORUCE_PATH='s3://new-bucket-rlnu/'
     S3_DESTINATION_PATH='s3://rlnusnowflakeland/unzip_files/'
@@ -41,6 +52,8 @@ Content-Disposition: attachment; filename="userdata.txt"
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 cd /home/ec2-user/
 
+rm ~file~.csv
+rm ~file~.zip
 aws s3 cp ~src_path~~file~.zip ~file~.zip 
 unzip -o -q ~file~.zip 
 aws s3 cp ~file~.csv ~tgt_root_path~~file~ 
@@ -55,23 +68,24 @@ aws s3 mv ~tgt_root_path~~file~ ~tgt_root_path~~file~/~file~.csv
     print(userDataEncoded)
     
     client = boto3.client('ec2')
+    res = boto3.resource('ec2')
     my_instance = 'i-0240ab086d705dfb6'
 
     # Stop the instance
-    client.stop_instances(InstanceIds=[my_instance])
-    waiter=client.get_waiter('instance_stopped')
-    waiter.wait(InstanceIds=[my_instance])
+    instance = res.Instance(my_instance)
+    if  instance.state['Name'] != 'stopped':
+        stop_ecc2(client,my_instance)
 
     response = client.modify_instance_attribute(InstanceId=my_instance, UserData={
         'Value': userDataEncoded
     })
     print(response)
     
-    #Start Instance here
-    res = boto3.resource('ec2')
-    ob_my_instance = res.Instance(my_instance)
-    ob_my_instance.start()
-    ob_my_instance.wait_until_running()
+    start_ecc2(res,my_instance)
+    #waiter = client.get_waiter('instance_status_ok')
+    #waiter.wait(InstanceIds=[my_instance])
+
+    #stop_ecc2(client,my_instance)
 
     print('unzipped successful')
 except BaseException as ex:
